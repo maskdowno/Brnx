@@ -9,6 +9,12 @@ Discord = { Enabled = false },
 KeySystem = false
 })
 
+Rayfield:Notify({
+	Title = "BRNX HUB",
+	Content = "🖤 THANK FOR USING BRONX HUB !",
+	Duration = 5
+})
+
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local head = character:WaitForChild("Head")
