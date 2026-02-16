@@ -13,18 +13,18 @@ local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local head = character:WaitForChild("Head")
 
-local billboard = Instance.new("BillboardGui")
+local billboard = Instance.new("BillboardGui", head)
 billboard.Size = UDim2.new(0, 200, 0, 50)
-billboard.Adornee = head
+billboard.StudsOffset = Vector3.new(0, 2.5, 0)
 billboard.AlwaysOnTop = true
-billboard.ExtentsOffset = Vector3.new(0, 3, 0)
-billboard.Parent = head
-local label = Instance.new("TextLabel")
+
+local label = Instance.new("TextLabel", billboard)
 label.Size = UDim2.new(1, 0, 1, 0)
 label.BackgroundTransparency = 1
 label.TextScaled = true
 label.Font = Enum.Font.GothamBold
 label.Text = player.Name
+
 task.spawn(function()
 	while true do
 		for i = 0, 1, 0.01 do
