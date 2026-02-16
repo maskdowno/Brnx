@@ -1,9 +1,9 @@
 local Rayfield =loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-Name = "👀المطور: Arthur👀",
-LoadingTitle = "Brookhaven Script",
-LoadingSubtitle = "by Sajjad",
+Name = "👀BRNX : brnx hub👀",
+LoadingTitle = "Test Script",
+LoadingSubtitle = "by .gg/Brnx",
 ConfigurationSaving = { Enabled = false },
 Discord = { Enabled = false },
 KeySystem = false
