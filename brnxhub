@@ -1,1 +1,30 @@
-h
+local Rayfield =loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+Name = "👀المطور: Arthur👀",
+LoadingTitle = "Brookhaven Script",
+LoadingSubtitle = "by Sajjad",
+ConfigurationSaving = { Enabled = false },
+Discord = { Enabled = false },
+KeySystem = false
+})
+
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local head = character:WaitForChild("Head")
+
+local billboard = Instance.new("BillboardGui")
+billboard.Size = UDim2.new(0, 200, 0, 50)
+billboard.Adornee = head
+billboard.AlwaysOnTop = true
+billboard.ExtentsOffset = Vector3.new(0, 3, 0)
+billboard.Parent = head
+
+local label = Instance.new("TextLabel")
+label.Size = UDim2.new(1, 0, 1, 0)
+label.BackgroundTransparency = 1
+label.Text =" مرحباً بك في سكربت المطور ارثر"
+label.TextColor3 = Color3.new(1, 1, 1)
+label.TextScaled = true
+label.Font = Enum.Font.SourceSansBold
+label.Parent = billboard
