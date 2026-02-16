@@ -9,27 +9,32 @@ Discord = { Enabled = false },
 KeySystem = false
 })
 
-local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
+local Players = game:GetService("Players")
+
+local character = script.Parent
+local player = Players:GetPlayerFromCharacter(character)
+if not player then return end
+
 local head = character:WaitForChild("Head")
 
-local billboard = Instance.new("BillboardGui", head)
+local billboard = Instance.new("BillboardGui")
+billboard.Name = "NameTag"
 billboard.Size = UDim2.new(0, 200, 0, 50)
 billboard.StudsOffset = Vector3.new(0, 2.5, 0)
 billboard.AlwaysOnTop = true
+billboard.Parent = head
 
-local label = Instance.new("TextLabel", billboard)
+local label = Instance.new("TextLabel")
 label.Size = UDim2.new(1, 0, 1, 0)
 label.BackgroundTransparency = 1
 label.TextScaled = true
 label.Font = Enum.Font.GothamBold
 label.Text = player.Name
+label.Parent = billboard
 
-task.spawn(function()
-	while true do
-		for i = 0, 1, 0.01 do
-			label.TextColor3 = Color3.fromHSV(i, 1, 1)
-			task.wait(0.03)
-		end
+while true do
+	for i = 0, 1, 0.01 do
+		label.TextColor3 = Color3.fromHSV(i, 1, 1)
+		task.wait(0.03)
 	end
-end)
+end
