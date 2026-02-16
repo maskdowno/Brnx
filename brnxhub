@@ -43,9 +43,3 @@ task.spawn(function()
 	end
 end)
 
-Tab:Addbuton
- Name = "Button!"
- Callback = function()
-        player.character.humanoid.walkspeed = 200
-  end
-})
