@@ -13,7 +13,7 @@ Rayfield:Notify({
 	Title = "BRNX HUB",
 	Content = "🖤 THANK FOR USING BRONX HUB !",
 	Duration = 5
-})
+
 local MainTab = Window:CreateTab("Main", 4483362458)
  local speedEnabled = false
  local normalSpeed = 16
