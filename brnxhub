@@ -33,6 +33,9 @@ label.Text = "Brnx"
 label.TextScaled = true
 label.Font = Enum.Font.SourceSansBold
 label.Parent = billboard
+}) 
+
+local Tab = Window:CreateTab("Tab Example", "rewind")
 
 task.spawn(function()
 	while true do
