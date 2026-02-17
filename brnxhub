@@ -36,17 +36,13 @@ MainTab:CreateToggle({
 		end
 	end,
 })
-
--- Reset speed on respawn
 player.CharacterAdded:Connect(function(char)
 	local humanoid = char:WaitForChild("Humanoid")
 	if speedEnabled then
 		humanoid.WalkSpeed = boostedSpeed
 	else
 		humanoid.WalkSpeed = normalSpeed
-	end
-end)
-
+end
 
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
