@@ -9,8 +9,12 @@ Discord = { Enabled = false },
 KeySystem = false
 })
 
-local Tab = Window:CreateTab("👀BRNX : brnx hub👀")
-local Section = Tab:CreateSection("Section")
+})
+local MainTab = Window:CreateTab("Main", 4483362458)
+local AimbotTab = Window:CreateTab("Aimbot", 4483362458)
+
+local MainSection = MainTab:CreateSection("Main Section")
+local AimSection = AimbotTab:CreateSection("Aimbot Section")
 
 
 Rayfield:Notify({
