@@ -9,13 +9,44 @@ Discord = { Enabled = false },
 KeySystem = false
 })
 
-local Section = Tab:CreateSection("brnx")
-
 Rayfield:Notify({
 	Title = "BRNX HUB",
 	Content = "🖤 THANK FOR USING BRONX HUB !",
 	Duration = 5
 })
+local MainTab = Window:CreateTab("Main", 4483362458)
+ local speedEnabled = false
+ local normalSpeed = 16
+ local boostedSpeed = 50
+
+MainTab:CreateToggle({
+	Name = "Speed Booster",
+	CurrentValue = false,
+	Flag = "SpeedToggle",
+	Callback = function(Value)
+		speedEnabled = Value
+		
+		local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+		if humanoid then
+			if speedEnabled then
+				humanoid.WalkSpeed = boostedSpeed
+			else
+				humanoid.WalkSpeed = normalSpeed
+			end
+		end
+	end,
+})
+
+-- Reset speed on respawn
+player.CharacterAdded:Connect(function(char)
+	local humanoid = char:WaitForChild("Humanoid")
+	if speedEnabled then
+		humanoid.WalkSpeed = boostedSpeed
+	else
+		humanoid.WalkSpeed = normalSpeed
+	end
+end)
+
 
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
