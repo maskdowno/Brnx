@@ -9,6 +9,11 @@ Discord = { Enabled = false },
 KeySystem = false
 })
 
+local Tab = Window:CreateTab("Main", 4483362458)
+
+local Section = Tab:CreateSection("Section")
+
+
 Rayfield:Notify({
 	Title = "BRNX HUB",
 	Content = "🖤 THANK FOR USING BRONX HUB !",
@@ -34,8 +39,6 @@ label.TextScaled = true
 label.Font = Enum.Font.SourceSansBold
 label.Parent = billboard
 }) 
-
-local Section = Tab:CreateSection("Section")
 
 task.spawn(function()
 	while true do
