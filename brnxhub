@@ -37,7 +37,7 @@ KeyTab:CreateButton({
         Rayfield:Notify({
             Title = "Link Copied",
             Content = "Key link copied to clipboard.",
-            Duration = 3,
+            Duration = 5,
             Image = 4483362458
         })
     end
