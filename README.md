@@ -1,2 +1,0 @@
-# Brnx
-Roblox kiddo
