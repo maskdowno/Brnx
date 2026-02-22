@@ -37,8 +37,8 @@ KeyTab:CreateButton({
         Rayfield:Notify({
             Title = "Link Copied",
             Content = "Key link copied to clipboard.",
-            Duration = 5,
-            Image = 97793547771314
+            Duration = 3,
+            Image = 12615346163
         })
     end
 })
@@ -52,7 +52,7 @@ KeyTab:CreateButton({
                 Title = "Error",
                 Content = "Enter a key first.",
                 Duration = 4,
-                Image = 97793547771314
+                Image = 12615346163
             })
             return
         end
@@ -61,8 +61,8 @@ KeyTab:CreateButton({
             Rayfield:Notify({
                 Title = "Access Granted",
                 Content = "Key accepted. Loading script...",
-                Duration = 3,
-                Image = 97793547771314
+                Duration = 5,
+                Image = 12615346163
             })
 
             task.wait(1)
@@ -77,8 +77,8 @@ KeyTab:CreateButton({
             Rayfield:Notify({
                 Title = "Invalid Key",
                 Content = "The key you entered is incorrect.",
-                Duration = 5,
-                Image = 97793547771314
+                Duration = 3.5,
+                Image = 12615346163
             })
         end
     end
