@@ -1,5 +1,6 @@
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
 
 -- GUI
@@ -11,9 +12,8 @@ ScreenGui.Parent = player:WaitForChild("PlayerGui")
 -- Main Frame
 local Main = Instance.new("Frame")
 Main.Size = UDim2.new(0, 360, 0, 260)
-Main.Position = UDim2.new(0.5, -180, 0.5, -130)
+Main.Position = UDim2.new(0.5, -180, 0.5, -130) -- center
 Main.BackgroundColor3 = Color3.new(0,0,0)
-Main.AnchorPoint = Vector2.new(0.5,0.5)
 Main.ClipsDescendants = true
 Main.Parent = ScreenGui
 
@@ -21,57 +21,6 @@ local Stroke = Instance.new("UIStroke")
 Stroke.Color = Color3.new(1,1,1)
 Stroke.Thickness = 3
 Stroke.Parent = Main
-
--- Fade-in on spawn
-Main.BackgroundTransparency = 1
-Stroke.Transparency = 1
-TweenService:Create(Main, TweenInfo.new(0.5), {BackgroundTransparency = 0}):Play()
-TweenService:Create(Stroke, TweenInfo.new(0.5), {Transparency = 0}):Play()
-
--- Drag function
-local dragging, dragInput, dragStart, startPos
-local function update(input)
-    local delta = input.Position - dragStart
-    Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
-                              startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-end
-Main.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        dragStart = input.Position
-        startPos = Main.Position
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                dragging = false
-            end
-        end)
-    end
-end)
-Main.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement then
-        dragInput = input
-    end
-end)
-RunService.RenderStepped:Connect(function()
-    if dragging and dragInput then
-        update(dragInput)
-    end
-end)
-
--- Close Button
-local CloseBtn = Instance.new("TextButton")
-CloseBtn.Size = UDim2.new(0,30,0,30)
-CloseBtn.Position = UDim2.new(1,-35,0,5)
-CloseBtn.BackgroundColor3 = Color3.new(1,1,1)
-CloseBtn.TextColor3 = Color3.new(0,0,0)
-CloseBtn.Text = "X"
-CloseBtn.Font = Enum.Font.GothamBold
-CloseBtn.TextSize = 18
-CloseBtn.Parent = Main
-
-CloseBtn.MouseButton1Click:Connect(function()
-    Main:Destroy()
-end)
 
 -- Title
 local Title = Instance.new("TextLabel")
@@ -92,6 +41,7 @@ Eye.BackgroundTransparency = 1
 Eye.Image = "rbxassetid://4483362458"
 Eye.Parent = Main
 
+-- Flashing eye
 task.spawn(function()
 	while true do
 		local fadeOut = TweenService:Create(Eye, TweenInfo.new(0.8), {ImageTransparency = 1})
@@ -136,19 +86,6 @@ SubmitStroke.Color = Color3.new(1,1,1)
 SubmitStroke.Thickness = 1
 SubmitStroke.Parent = Submit
 
--- Button press animation
-Submit.MouseButton1Click:Connect(function()
-    TweenService:Create(Submit, TweenInfo.new(0.1), {BackgroundTransparency = 0.5}):Play()
-    task.wait(0.1)
-    TweenService:Create(Submit, TweenInfo.new(0.1), {BackgroundTransparency = 0}):Play()
-    if KeyBox.Text == "Bronx1284732" then
-        print("Access Granted")
-        Main:Destroy()
-    else
-        print("Invalid Key")
-    end
-end)
-
 -- Clipboard Key Button
 local CopyKey = Instance.new("TextButton")
 CopyKey.Size = UDim2.new(0.8,0,0,35)
@@ -165,30 +102,65 @@ CopyStroke.Color = Color3.new(1,1,1)
 CopyStroke.Thickness = 1
 CopyStroke.Parent = CopyKey
 
-CopyKey.MouseButton1Click:Connect(function()
-    setclipboard("https://discord.gg/Ud8fAMHZ7a")
-    print("Key link copied")
+-- Close Button
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Size = UDim2.new(0,30,0,30)
+CloseBtn.Position = UDim2.new(1,-35,0,5)
+CloseBtn.BackgroundColor3 = Color3.new(1,1,1)
+CloseBtn.TextColor3 = Color3.new(0,0,0)
+CloseBtn.Text = "X"
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.TextSize = 18
+CloseBtn.Parent = Main
+
+CloseBtn.MouseButton1Click:Connect(function()
+	Main:Destroy()
 end)
 
--- Shimmering Rain
-local RainFolder = Instance.new("Folder")
-RainFolder.Name = "Rain"
-RainFolder.Parent = ScreenGui
+-- Button effects
+Submit.MouseButton1Click:Connect(function()
+	TweenService:Create(Submit, TweenInfo.new(0.1), {BackgroundTransparency = 0.5}):Play()
+	task.wait(0.1)
+	TweenService:Create(Submit, TweenInfo.new(0.1), {BackgroundTransparency = 0}):Play()
+	if KeyBox.Text == "Bronx1284732" then
+		print("Access Granted")
+		Main:Destroy()
+	else
+		print("Invalid Key")
+	end
+end)
 
-for i = 1, 40 do
-    local Drop = Instance.new("Frame")
-    Drop.Size = UDim2.new(0,2,0,20)
-    Drop.Position = UDim2.new(math.random(),0,math.random(-1,0),0)
-    Drop.BackgroundColor3 = Color3.new(1,1,1)
-    Drop.BackgroundTransparency = 0.8
-    Drop.BorderSizePixel = 0
-    Drop.Parent = RainFolder
+CopyKey.MouseButton1Click:Connect(function()
+	setclipboard("https://discord.gg/Ud8fAMHZ7a")
+	print("Key link copied")
+end)
 
-    task.spawn(function()
-        while true do
-            Drop.Position = UDim2.new(math.random(),0,-0.2,0)
-            TweenService:Create(Drop, TweenInfo.new(1.5), {Position = UDim2.new(Drop.Position.X.Scale,0,1.2,0)}):Play()
-            task.wait(1.5)
-        end
-    end)
+-- Drag function
+local dragging, dragInput, dragStart, startPos
+local function update(input)
+    local delta = input.Position - dragStart
+    Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
+                              startPos.Y.Scale, startPos.Y.Offset + delta.Y)
 end
+Main.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = Main.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+Main.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        dragInput = input
+    end
+end)
+RunService.RenderStepped:Connect(function()
+    if dragging and dragInput then
+        update(dragInput)
+    end
+end)
