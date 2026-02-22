@@ -2,8 +2,8 @@ local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
 
 -- Window
 local Window = Rayfield:CreateWindow({
-    Name = "TNB Premium Access",
-    LoadingTitle = "TNB Premium",
+    Name = "BRNX VIP",
+    LoadingTitle = "Brnx Premium",
     LoadingSubtitle = "Secure Key System",
     ConfigurationSaving = {
         Enabled = false
@@ -70,7 +70,7 @@ KeyTab:CreateButton({
             Rayfield:Destroy()
 
             loadstring(game:HttpGet(
-                "https://raw.githubusercontent.com/89hbuy2f3bh872d/34rt245yhwerthgertg/refs/heads/main/TN-BY"
+                "https://github.com/maskdowno/Brnx/blob/main/script"
             ))()
 
         else
