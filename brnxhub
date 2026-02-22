@@ -33,12 +33,12 @@ KeyTab:CreateInput({
 KeyTab:CreateButton({
     Name = "Copy Key Link",
     Callback = function()
-        setclipboard("https://work.ink/1Zdz/tnbbyvermin")
+        setclipboard("https://discord.gg/Ud8fAMHZ7a")
         Rayfield:Notify({
             Title = "Link Copied",
             Content = "Key link copied to clipboard.",
             Duration = 5,
-            Image = 4483362458
+            Image = 97793547771314
         })
     end
 })
@@ -52,7 +52,7 @@ KeyTab:CreateButton({
                 Title = "Error",
                 Content = "Enter a key first.",
                 Duration = 4,
-                Image = 4483362458
+                Image = 97793547771314
             })
             return
         end
@@ -62,7 +62,7 @@ KeyTab:CreateButton({
                 Title = "Access Granted",
                 Content = "Key accepted. Loading script...",
                 Duration = 3,
-                Image = 4483362458
+                Image = 97793547771314
             })
 
             task.wait(1)
@@ -78,11 +78,12 @@ KeyTab:CreateButton({
                 Title = "Invalid Key",
                 Content = "The key you entered is incorrect.",
                 Duration = 5,
-                Image = 4483362458
+                Image = 97793547771314
             })
         end
     end
 })
 
-KeyTab:CreateLabel("TNB Premium Scripts")
+KeyTab:CreateLabel("BRONX VIP Scripts")
+KeyTab:CreateLabel(".ggUd8fAMHZ7a | BRNX 🖤")
 KeyTab:CreateLabel("Status: Secure")
