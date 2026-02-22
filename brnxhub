@@ -1,25 +1,171 @@
--- RAIN EFFECT
-local RainFolder = Instance.new("Folder")
-RainFolder.Name = "Rain"
-RainFolder.Parent = ScreenGui
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
 
-for i = 1, 40 do
-	local Drop = Instance.new("Frame")
-	Drop.Size = UDim2.new(0,2,0,20)
-	Drop.Position = UDim2.new(math.random(),0,math.random(-1,0),0)
-	Drop.BackgroundColor3 = Color3.fromRGB(255,255,255)
-	Drop.BackgroundTransparency = 0.8
-	Drop.BorderSizePixel = 0
-	Drop.Parent = RainFolder
+-- ScreenGui
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "BRNX_UI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = player:WaitForChild("PlayerGui")
 
-	task.spawn(function()
-		while Drop.Parent do
-			Drop.Position = UDim2.new(math.random(),0,-0.2,0)
-			TweenService:Create(Drop, TweenInfo.new(1.5), {Position = UDim2.new(Drop.Position.X.Scale,0,1.2,0)}):Play()
-			task.wait(1.5)
+-- Main Frame
+local Main = Instance.new("Frame")
+Main.Size = UDim2.new(0, 360, 0, 260)
+Main.Position = UDim2.new(0.5, -180, 0.5, -130)
+Main.BackgroundColor3 = Color3.fromRGB(0,0,0)
+Main.BorderSizePixel = 0
+Main.Parent = ScreenGui
+
+-- Main Stroke
+local Stroke = Instance.new("UIStroke")
+Stroke.Color = Color3.fromRGB(255,255,255)
+Stroke.Thickness = 3
+Stroke.Parent = Main
+
+-- Pulse Stroke
+local PulseStroke = Instance.new("UIStroke")
+PulseStroke.Color = Color3.fromRGB(255,255,255)
+PulseStroke.Thickness = 3
+PulseStroke.Parent = Main
+
+-- Fade-in
+Main.BackgroundTransparency = 1
+Stroke.Transparency = 1
+PulseStroke.Transparency = 1
+TweenService:Create(Main, TweenInfo.new(0.8), {BackgroundTransparency = 0}):Play()
+TweenService:Create(Stroke, TweenInfo.new(0.8), {Transparency = 0}):Play()
+TweenService:Create(PulseStroke, TweenInfo.new(0.8), {Transparency = 0}):Play()
+
+-- Pulse animation
+task.spawn(function()
+	while Main.Parent do
+		for i = 3,6,0.1 do
+			PulseStroke.Thickness = i
+			task.wait(0.02)
 		end
+		for i = 6,3,-0.1 do
+			PulseStroke.Thickness = i
+			task.wait(0.02)
+		end
+	end
+end)
+
+-- Title
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1,0,0,40)
+Title.Position = UDim2.new(0,0,0,0)
+Title.BackgroundTransparency = 1
+Title.Text = "BRNX VIP"
+Title.TextColor3 = Color3.fromRGB(255,255,255)
+Title.TextScaled = true
+Title.Font = Enum.Font.GothamBold
+Title.Parent = Main
+
+-- Eye Icon
+local Eye = Instance.new("ImageLabel")
+Eye.Size = UDim2.new(0,50,0,50)
+Eye.Position = UDim2.new(0.5,-25,0,50)
+Eye.BackgroundTransparency = 1
+Eye.Image = "rbxassetid://4483362458"
+Eye.Parent = Main
+
+-- Flashing eye
+task.spawn(function()
+	while true do
+		for i=0,1,0.05 do
+			Eye.ImageTransparency = i
+			task.wait(0.03)
+		end
+		for i=1,0,-0.05 do
+			Eye.ImageTransparency = i
+			task.wait(0.03)
+		end
+	end
+end)
+
+-- Key Input
+local KeyBox = Instance.new("TextBox")
+KeyBox.Size = UDim2.new(0.8,0,0,35)
+KeyBox.Position = UDim2.new(0.1,0,0,120)
+KeyBox.BackgroundColor3 = Color3.fromRGB(0,0,0)
+KeyBox.TextColor3 = Color3.fromRGB(255,255,255)
+KeyBox.PlaceholderText = "ENTER YOUR KEY"
+KeyBox.Font = Enum.Font.Gotham
+KeyBox.TextSize = 16
+KeyBox.ClearTextOnFocus = false
+KeyBox.Parent = Main
+
+local KeyStroke = Instance.new("UIStroke")
+KeyStroke.Color = Color3.fromRGB(255,255,255)
+KeyStroke.Thickness = 2
+KeyStroke.Parent = KeyBox
+
+-- Submit Button
+local Submit = Instance.new("TextButton")
+Submit.Size = UDim2.new(0.8,0,0,35)
+Submit.Position = UDim2.new(0.1,0,0,170)
+Submit.BackgroundColor3 = Color3.fromRGB(255,255,255)
+Submit.TextColor3 = Color3.fromRGB(0,0,0)
+Submit.Text = "SUBMIT KEY"
+Submit.Font = Enum.Font.GothamBold
+Submit.TextSize = 16
+Submit.Parent = Main
+
+local SubmitStroke = Instance.new("UIStroke")
+SubmitStroke.Color = Color3.fromRGB(255,255,255)
+SubmitStroke.Thickness = 1
+SubmitStroke.Parent = Submit
+
+-- Clipboard Button
+local CopyKey = Instance.new("TextButton")
+CopyKey.Size = UDim2.new(0.8,0,0,35)
+CopyKey.Position = UDim2.new(0.1,0,0,215)
+CopyKey.BackgroundColor3 = Color3.fromRGB(255,255,255)
+CopyKey.TextColor3 = Color3.fromRGB(0,0,0)
+CopyKey.Text = "COPY KEY LINK"
+CopyKey.Font = Enum.Font.GothamBold
+CopyKey.TextSize = 16
+CopyKey.Parent = Main
+
+local CopyStroke = Instance.new("UIStroke")
+CopyStroke.Color = Color3.fromRGB(255,255,255)
+CopyStroke.Thickness = 1
+CopyStroke.Parent = CopyKey
+
+-- Close Button
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Size = UDim2.new(0,30,0,30)
+CloseBtn.Position = UDim2.new(1,-35,0,5)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(255,255,255)
+CloseBtn.TextColor3 = Color3.fromRGB(0,0,0)
+CloseBtn.Text = "X"
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.TextSize = 18
+CloseBtn.Parent = Main
+
+CloseBtn.MouseButton1Click:Connect(function()
+	Main:Destroy()
+end)
+
+-- BUTTON HOVER
+local function AddHover(button)
+	local Glow = Instance.new("UIStroke")
+	Glow.Color = Color3.fromRGB(255,255,255)
+	Glow.Thickness = 1
+	Glow.Parent = button
+
+	button.MouseEnter:Connect(function()
+		TweenService:Create(Glow, TweenInfo.new(0.3), {Thickness = 4}):Play()
+	end)
+	button.MouseLeave:Connect(function()
+		TweenService:Create(Glow, TweenInfo.new(0.3), {Thickness = 1}):Play()
 	end)
 end
+
+AddHover(Submit)
+AddHover(CopyKey)
+AddHover(CloseBtn)
 
 -- NOTIFICATIONS
 local NotifyFolder = Instance.new("Folder")
@@ -79,7 +225,7 @@ local function CreateNotification(title, content, duration)
 	end)
 end
 
--- UPDATE BUTTONS TO USE NOTIFICATIONS
+-- Button actions with notifications
 Submit.MouseButton1Click:Connect(function()
 	TweenService:Create(Submit, TweenInfo.new(0.1), {BackgroundTransparency = 0.5}):Play()
 	task.wait(0.1)
@@ -98,21 +244,60 @@ CopyKey.MouseButton1Click:Connect(function()
 	CreateNotification("Link Copied", "Key link copied to clipboard.", 3)
 end)
 
--- BUTTON HOVER ANIMATION
-local function AddHover(button)
-	local Glow = Instance.new("UIStroke")
-	Glow.Color = Color3.fromRGB(255,255,255)
-	Glow.Thickness = 1
-	Glow.Parent = button
-
-	button.MouseEnter:Connect(function()
-		TweenService:Create(Glow, TweenInfo.new(0.3), {Thickness = 4}):Play()
-	end)
-	button.MouseLeave:Connect(function()
-		TweenService:Create(Glow, TweenInfo.new(0.3), {Thickness = 1}):Play()
-	end)
+-- DRAGGING
+local dragging = false
+local dragInput, dragStart, startPos
+local function update(input)
+	local delta = input.Position - dragStart
+	Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
+	                          startPos.Y.Scale, startPos.Y.Offset + delta.Y)
 end
 
-AddHover(Submit)
-AddHover(CopyKey)
-AddHover(CloseBtn)
+Main.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		dragStart = input.Position
+		startPos = Main.Position
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end)
+
+Main.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement then
+		dragInput = input
+	end
+end)
+
+RunService.RenderStepped:Connect(function()
+	if dragging and dragInput then
+		update(dragInput)
+	end
+end)
+
+-- SHIMMERING RAIN
+local RainFolder = Instance.new("Folder")
+RainFolder.Name = "Rain"
+RainFolder.Parent = ScreenGui
+
+for i = 1, 40 do
+	local Drop = Instance.new("Frame")
+	Drop.Size = UDim2.new(0,2,0,20)
+	Drop.Position = UDim2.new(math.random(),0,math.random(-1,0),0)
+	Drop.BackgroundColor3 = Color3.fromRGB(255,255,255)
+	Drop.BackgroundTransparency = 0.8
+	Drop.BorderSizePixel = 0
+	Drop.Parent = RainFolder
+
+	task.spawn(function()
+		while Drop.Parent do
+			Drop.Position = UDim2.new(math.random(),0,-0.2,0)
+			local fade = TweenService:Create(Drop, TweenInfo.new(1.5), {Position = UDim2.new(Drop.Position.X.Scale,0,1.2,0)})
+			fade:Play()
+			task.wait(1.5)
+		end
+	end)
+end
