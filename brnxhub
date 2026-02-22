@@ -1,75 +1,80 @@
-local Rayfield =loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+-- 1. LOAD FLUENT LIBRARY
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 
-local Window = Rayfield:CreateWindow({
-Name = "👀BRNX : brnx hub👀",
-LoadingTitle = "Test Script",
-LoadingSubtitle = "by .gg/Brnx",
-ConfigurationSaving = { Enabled = false },
-Discord = { Enabled = false },
-KeySystem = false
-})
-
-Rayfield:Notify({
-	Title = "BRNX HUB",
-	Content = "🖤 THANK FOR USING BRONX HUB !",
-	Duration = 5
-
-local MainTab = Window:CreateTab("Main", 4483362458)
- local speedEnabled = false
- local normalSpeed = 16
- local boostedSpeed = 50
-
-MainTab:CreateToggle({
-	Name = "Speed Booster",
-	CurrentValue = false,
-	Flag = "SpeedToggle",
-	Callback = function(Value)
-		speedEnabled = Value
-		
-		local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
-		if humanoid then
-			if speedEnabled then
-				humanoid.WalkSpeed = boostedSpeed
-			else
-				humanoid.WalkSpeed = normalSpeed
-			end
-		end
-	end,
-})
-player.CharacterAdded:Connect(function(char)
-	local humanoid = char:WaitForChild("Humanoid")
-	if speedEnabled then
-		humanoid.WalkSpeed = boostedSpeed
-	else
-		humanoid.WalkSpeed = normalSpeed
+-- 2. SOUND EFFECT
+local function playLoadSound()
+    local sound = Instance.new("Sound")
+    sound.SoundId = "rbxassetid://6042049033" 
+    sound.Volume = 0.5
+    sound.Parent = game:GetService("SoundService")
+    sound:Play()
+    game:GetService("Debris"):AddItem(sound, 2)
 end
+playLoadSound()
 
-local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local head = character:WaitForChild("Head")
+-- 3. WINDOW SETUP
+local Window = Fluent:CreateWindow({
+    Title = "TNB Key System",
+    SubTitle = "by Vermin",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(440, 320),
+    Acrylic = true,
+    Theme = "Dark",
+    MinimizeKey = Enum.KeyCode.LeftControl
+})
 
-local billboard = Instance.new("BillboardGui")
-billboard.Size = UDim2.new(0, 200, 0, 50)
-billboard.Adornee = head
-billboard.AlwaysOnTop = true
-billboard.ExtentsOffset = Vector3.new(0, 3, 0)
-billboard.Parent = head
+local Tabs = {
+    Main = Window:AddTab({ Title = "Access", Icon = "unlock" })
+}
 
-local label = Instance.new("TextLabel")
-label.Size = UDim2.new(1, 0, 1, 0)
-label.BackgroundTransparency = 1
-label.Text = "Brnx"
-label.TextScaled = true
-label.Font = Enum.Font.SourceSansBold
-label.Parent = billboard
-}) 
+local enteredKey = ""
 
-task.spawn(function()
-	while true do
-		for i = 0, 1, 0.01 do
-			label.TextColor3 = Color3.fromHSV(i, 1, 1)
-			task.wait(0.03)
-		end
-	end
-end)
+-- INPUT BOX
+Tabs.Main:AddInput("Input", {
+    Title = "Enter Key",
+    Placeholder = "Paste key here...",
+    Callback = function(Value)
+        enteredKey = Value
+    end
+})
 
+-- GET KEY BUTTON
+Tabs.Main:AddButton({
+    Title = "Get Key",
+    Callback = function()
+        setclipboard("https://work.ink")
+        Fluent:Notify({ Title = "Copied", Content = "Link added to clipboard!", Duration = 3 })
+    end
+})
+
+-- SUBMIT BUTTON (The only place the script should load from)
+Tabs.Main:AddButton({
+    Title = "Submit",
+    Callback = function()
+        -- Hardcoded "Admin" bypass
+        if enteredKey == "Bronx" then
+            Window:Destroy()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com"))()
+            return
+        end
+
+        -- API Check
+        local success, verifyResponse = pcall(function()
+            return game:HttpGet("https://work.ink" .. enteredKey)
+        end)
+
+        if success then
+            local keyInfo = game:GetService("HttpService"):JSONDecode(verifyResponse)
+            if keyInfo and keyInfo.valid == true and keyInfo.info and keyInfo.info.linkId == 805765 then
+                Window:Destroy()
+                loadstring(game:HttpGet("https://raw.githubusercontent.com"))()
+            else
+                Fluent:Notify({ Title = "Invalid", Content = "Incorrect key.", Duration = 4 })
+            end
+        else
+            Fluent:Notify({ Title = "Error", Content = "Connection failed.", Duration = 4 })
+        end
+    end
+})
+
+Window:SelectTab(1)
