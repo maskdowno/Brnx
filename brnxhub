@@ -1,89 +1,152 @@
-local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
 
--- Window
-local Window = Rayfield:CreateWindow({
-    Name = "BRNX VIP",
-    LoadingTitle = "Brnx Premium",
-    LoadingSubtitle = "Secure Key System",
-    ConfigurationSaving = {
-        Enabled = false
-    },
-    Discord = {
-        Enabled = false
-    },
-    KeySystem = false
-})
+-- GUI
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "BRNX_UI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = player:WaitForChild("PlayerGui")
 
--- Tab
-local KeyTab = Window:CreateTab("🔐 Key System", 4483362458)
+-- Rain Layer
+local RainFolder = Instance.new("Folder")
+RainFolder.Name = "Rain"
+RainFolder.Parent = ScreenGui
 
-KeyTab:CreateSection("Authentication")
+for i = 1, 50 do
+    local Drop = Instance.new("Frame")
+    Drop.Size = UDim2.new(0,2,0,20)
+    Drop.Position = UDim2.new(math.random(),0,math.random(-1,0),0)
+    Drop.BackgroundColor3 = Color3.new(1,1,1)
+    Drop.BackgroundTransparency = 0.8
+    Drop.BorderSizePixel = 0
+    Drop.Parent = RainFolder
 
-local enteredKey = ""
-
-KeyTab:CreateInput({
-    Name = "Enter Your Key",
-    PlaceholderText = "Type your key here...",
-    RemoveTextAfterFocusLost = false,
-    Callback = function(text)
-        enteredKey = text
-    end
-})
-
-KeyTab:CreateButton({
-    Name = "Copy Key Link",
-    Callback = function()
-        setclipboard("https://discord.gg/Ud8fAMHZ7a")
-        Rayfield:Notify({
-            Title = "Link Copied",
-            Content = "Key link copied to clipboard.",
-            Duration = 3,
-            Image = 12615346163
-        })
-    end
-})
-
-KeyTab:CreateButton({
-    Name = "Submit Key",
-    Callback = function()
-
-        if enteredKey == nil or enteredKey == "" then
-            Rayfield:Notify({
-                Title = "Error",
-                Content = "Enter a key first.",
-                Duration = 4,
-                Image = 12615346163
-            })
-            return
+    task.spawn(function()
+        while true do
+            Drop.Position = UDim2.new(math.random(),0,-0.2,0)
+            TweenService:Create(Drop, TweenInfo.new(1.5), {Position = UDim2.new(Drop.Position.X.Scale,0,1.2,0)}):Play()
+            task.wait(1.5)
         end
+    end)
+end
 
-        if enteredKey == "Bronx1284732" then
-            Rayfield:Notify({
-                Title = "Access Granted",
-                Content = "Key accepted. Loading script...",
-                Duration = 5,
-                Image = 12615346163
-            })
+-- Main Frame
+local Main = Instance.new("Frame")
+Main.Size = UDim2.new(0, 420, 0, 320)
+Main.Position = UDim2.new(0.5, -210, 0.5, -160)
+Main.BackgroundColor3 = Color3.new(0,0,0)
+Main.Parent = ScreenGui
+Main.ClipsDescendants = true
 
-            task.wait(1)
+local Stroke = Instance.new("UIStroke")
+Stroke.Color = Color3.new(1,1,1)
+Stroke.Thickness = 3
+Stroke.Parent = Main
 
-            Rayfield:Destroy()
+-- Title
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1,0,0,50)
+Title.Position = UDim2.new(0,0,0,0)
+Title.BackgroundTransparency = 1
+Title.Text = "BRNX VIP"
+Title.TextColor3 = Color3.new(1,1,1)
+Title.TextScaled = true
+Title.Font = Enum.Font.GothamBold
+Title.Parent = Main
 
-            loadstring(game:HttpGet(
-                "https://github.com/maskdowno/Brnx/blob/main/script"
-            ))()
+-- Eye Icon
+local Eye = Instance.new("ImageLabel")
+Eye.Size = UDim2.new(0,60,0,60)
+Eye.Position = UDim2.new(0.5,-30,0,60)
+Eye.BackgroundTransparency = 1
+Eye.Image = "rbxassetid://4483362458" -- Eye icon
+Eye.Parent = Main
 
-        else
-            Rayfield:Notify({
-                Title = "Invalid Key",
-                Content = "The key you entered is incorrect.",
-                Duration = 3.5,
-                Image = 12615346163
-            })
-        end
+-- Eye Flash
+task.spawn(function()
+	while true do
+		local fadeOut = TweenService:Create(Eye, TweenInfo.new(0.8, Enum.EasingStyle.Quad), {ImageTransparency = 1})
+		local fadeIn = TweenService:Create(Eye, TweenInfo.new(0.8, Enum.EasingStyle.Quad), {ImageTransparency = 0})
+		fadeOut:Play()
+		fadeOut.Completed:Wait()
+		fadeIn:Play()
+		fadeIn.Completed:Wait()
+	end
+end)
+
+-- Key Input
+local KeyBox = Instance.new("TextBox")
+KeyBox.Size = UDim2.new(0.8,0,0,40)
+KeyBox.Position = UDim2.new(0.1,0,0,150)
+KeyBox.BackgroundColor3 = Color3.fromRGB(0,0,0)
+KeyBox.TextColor3 = Color3.new(1,1,1)
+KeyBox.PlaceholderText = "ENTER YOUR KEY"
+KeyBox.Font = Enum.Font.Gotham
+KeyBox.TextSize = 18
+KeyBox.Text = ""
+KeyBox.ClearTextOnFocus = false
+KeyBox.Parent = Main
+
+local KeyStroke = Instance.new("UIStroke")
+KeyStroke.Color = Color3.new(1,1,1)
+KeyStroke.Thickness = 2
+KeyStroke.Parent = KeyBox
+
+-- Submit Button
+local Submit = Instance.new("TextButton")
+Submit.Size = UDim2.new(0.8,0,0,40)
+Submit.Position = UDim2.new(0.1,0,0,210)
+Submit.BackgroundColor3 = Color3.new(1,1,1)
+Submit.TextColor3 = Color3.new(0,0,0)
+Submit.Text = "SUBMIT KEY"
+Submit.Font = Enum.Font.GothamBold
+Submit.TextSize = 18
+Submit.Parent = Main
+
+local Glow = Instance.new("UIStroke")
+Glow.Color = Color3.new(1,1,1)
+Glow.Thickness = 1
+Glow.Parent = Submit
+
+-- Hover Glow
+Submit.MouseEnter:Connect(function()
+    TweenService:Create(Glow, TweenInfo.new(0.3), {Thickness = 4}):Play()
+end)
+Submit.MouseLeave:Connect(function()
+    TweenService:Create(Glow, TweenInfo.new(0.3), {Thickness = 1}):Play()
+end)
+
+-- Key Logic
+Submit.MouseButton1Click:Connect(function()
+    if KeyBox.Text == "Bronx1284732" then
+        print("Access Granted")
+        ScreenGui:Destroy()
+    else
+        print("Invalid Key")
     end
-})
+end)
 
-KeyTab:CreateLabel("BRONX VIP Scripts")
-KeyTab:CreateLabel(".ggUd8fAMHZ7a | BRNX 🖤")
-KeyTab:CreateLabel("Status: Secure")
+-- Info Labels
+local Info1 = Instance.new("TextLabel")
+Info1.Size = UDim2.new(1,0,0,20)
+Info1.Position = UDim2.new(0,0,0,270)
+Info1.BackgroundTransparency = 1
+Info1.Text = "BRONX VIP SCRIPTS"
+Info1.TextColor3 = Color3.new(1,1,1)
+Info1.TextScaled = false
+Info1.Font = Enum.Font.GothamBold
+Info1.TextSize = 16
+Info1.Parent = Main
+
+local Info2 = Instance.new("TextLabel")
+Info2.Size = UDim2.new(1,0,0,20)
+Info2.Position = UDim2.new(0,0,0,290)
+Info2.BackgroundTransparency = 1
+Info2.Text = "DISCORD: .gg/Ud8fAMHZ7a | BRNX 🖤"
+Info2.TextColor3 = Color3.new(1,1,1)
+Info2.TextScaled = false
+Info2.Font = Enum.Font.Gotham
+Info2.TextSize = 14
+Info2.Parent = Main
