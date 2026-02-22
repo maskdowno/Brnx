@@ -1,9 +1,8 @@
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
-local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
 
--- GUI
+-- ScreenGui
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "BRNX_UI"
 ScreenGui.ResetOnSpawn = false
@@ -12,13 +11,14 @@ ScreenGui.Parent = player:WaitForChild("PlayerGui")
 -- Main Frame
 local Main = Instance.new("Frame")
 Main.Size = UDim2.new(0, 360, 0, 260)
-Main.Position = UDim2.new(0.5, -180, 0.5, -130) -- center
-Main.BackgroundColor3 = Color3.new(0,0,0)
-Main.ClipsDescendants = true
+Main.Position = UDim2.new(0.5, -180, 0.5, -130)
+Main.BackgroundColor3 = Color3.fromRGB(0,0,0)
+Main.BorderSizePixel = 0
 Main.Parent = ScreenGui
 
+-- White stroke
 local Stroke = Instance.new("UIStroke")
-Stroke.Color = Color3.new(1,1,1)
+Stroke.Color = Color3.fromRGB(255,255,255)
 Stroke.Thickness = 3
 Stroke.Parent = Main
 
@@ -28,7 +28,7 @@ Title.Size = UDim2.new(1,0,0,40)
 Title.Position = UDim2.new(0,0,0,0)
 Title.BackgroundTransparency = 1
 Title.Text = "BRNX VIP"
-Title.TextColor3 = Color3.new(1,1,1)
+Title.TextColor3 = Color3.fromRGB(255,255,255)
 Title.TextScaled = true
 Title.Font = Enum.Font.GothamBold
 Title.Parent = Main
@@ -44,12 +44,14 @@ Eye.Parent = Main
 -- Flashing eye
 task.spawn(function()
 	while true do
-		local fadeOut = TweenService:Create(Eye, TweenInfo.new(0.8), {ImageTransparency = 1})
-		local fadeIn = TweenService:Create(Eye, TweenInfo.new(0.8), {ImageTransparency = 0})
-		fadeOut:Play()
-		fadeOut.Completed:Wait()
-		fadeIn:Play()
-		fadeIn.Completed:Wait()
+		for i=0,1,0.05 do
+			Eye.ImageTransparency = i
+			task.wait(0.03)
+		end
+		for i=1,0,-0.05 do
+			Eye.ImageTransparency = i
+			task.wait(0.03)
+		end
 	end
 end)
 
@@ -57,57 +59,40 @@ end)
 local KeyBox = Instance.new("TextBox")
 KeyBox.Size = UDim2.new(0.8,0,0,35)
 KeyBox.Position = UDim2.new(0.1,0,0,120)
-KeyBox.BackgroundColor3 = Color3.new(0,0,0)
-KeyBox.TextColor3 = Color3.new(1,1,1)
+KeyBox.BackgroundColor3 = Color3.fromRGB(0,0,0)
+KeyBox.TextColor3 = Color3.fromRGB(255,255,255)
 KeyBox.PlaceholderText = "ENTER YOUR KEY"
 KeyBox.Font = Enum.Font.Gotham
 KeyBox.TextSize = 16
 KeyBox.ClearTextOnFocus = false
 KeyBox.Parent = Main
 
-local KeyStroke = Instance.new("UIStroke")
-KeyStroke.Color = Color3.new(1,1,1)
-KeyStroke.Thickness = 2
-KeyStroke.Parent = KeyBox
-
 -- Submit Button
 local Submit = Instance.new("TextButton")
 Submit.Size = UDim2.new(0.8,0,0,35)
 Submit.Position = UDim2.new(0.1,0,0,170)
-Submit.BackgroundColor3 = Color3.new(1,1,1)
-Submit.TextColor3 = Color3.new(0,0,0)
+Submit.BackgroundColor3 = Color3.fromRGB(255,255,255)
+Submit.TextColor3 = Color3.fromRGB(0,0,0)
 Submit.Text = "SUBMIT KEY"
 Submit.Font = Enum.Font.GothamBold
 Submit.TextSize = 16
 Submit.Parent = Main
 
-local SubmitStroke = Instance.new("UIStroke")
-SubmitStroke.Color = Color3.new(1,1,1)
-SubmitStroke.Thickness = 1
-SubmitStroke.Parent = Submit
-
--- Clipboard Key Button
-local CopyKey = Instance.new("TextButton")
-CopyKey.Size = UDim2.new(0.8,0,0,35)
-CopyKey.Position = UDim2.new(0.1,0,0,215)
-CopyKey.BackgroundColor3 = Color3.new(1,1,1)
-CopyKey.TextColor3 = Color3.new(0,0,0)
-CopyKey.Text = "COPY KEY LINK"
-CopyKey.Font = Enum.Font.GothamBold
-CopyKey.TextSize = 16
-CopyKey.Parent = Main
-
-local CopyStroke = Instance.new("UIStroke")
-CopyStroke.Color = Color3.new(1,1,1)
-CopyStroke.Thickness = 1
-CopyStroke.Parent = CopyKey
+Submit.MouseButton1Click:Connect(function()
+	if KeyBox.Text == "Bronx1284732" then
+		print("Access Granted")
+		Main:Destroy()
+	else
+		print("Invalid Key")
+	end
+end)
 
 -- Close Button
 local CloseBtn = Instance.new("TextButton")
 CloseBtn.Size = UDim2.new(0,30,0,30)
 CloseBtn.Position = UDim2.new(1,-35,0,5)
-CloseBtn.BackgroundColor3 = Color3.new(1,1,1)
-CloseBtn.TextColor3 = Color3.new(0,0,0)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(255,255,255)
+CloseBtn.TextColor3 = Color3.fromRGB(0,0,0)
 CloseBtn.Text = "X"
 CloseBtn.Font = Enum.Font.GothamBold
 CloseBtn.TextSize = 18
@@ -117,50 +102,36 @@ CloseBtn.MouseButton1Click:Connect(function()
 	Main:Destroy()
 end)
 
--- Button effects
-Submit.MouseButton1Click:Connect(function()
-	TweenService:Create(Submit, TweenInfo.new(0.1), {BackgroundTransparency = 0.5}):Play()
-	task.wait(0.1)
-	TweenService:Create(Submit, TweenInfo.new(0.1), {BackgroundTransparency = 0}):Play()
-	if KeyBox.Text == "Bronx1284732" then
-		print("Access Granted")
-		Main:Destroy()
-	else
-		print("Invalid Key")
+-- Drag function
+local dragging = false
+local dragInput, dragStart, startPos
+local function update(input)
+	local delta = input.Position - dragStart
+	Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
+	                          startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+
+Main.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		dragStart = input.Position
+		startPos = Main.Position
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
 	end
 end)
 
-CopyKey.MouseButton1Click:Connect(function()
-	setclipboard("https://discord.gg/Ud8fAMHZ7a")
-	print("Key link copied")
+Main.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement then
+		dragInput = input
+	end
 end)
 
--- Drag function
-local dragging, dragInput, dragStart, startPos
-local function update(input)
-    local delta = input.Position - dragStart
-    Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
-                              startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-end
-Main.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        dragStart = input.Position
-        startPos = Main.Position
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                dragging = false
-            end
-        end)
-    end
-end)
-Main.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement then
-        dragInput = input
-    end
-end)
-RunService.RenderStepped:Connect(function()
-    if dragging and dragInput then
-        update(dragInput)
-    end
+game:GetService("RunService").RenderStepped:Connect(function()
+	if dragging and dragInput then
+		update(dragInput)
+	end
 end)
