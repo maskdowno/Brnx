@@ -9,13 +9,18 @@ ScreenGui.Name = "BRNX_UI"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = player:WaitForChild("PlayerGui")
 
--- Main Frame
+-- MAIN FRAME
 local Main = Instance.new("Frame")
 Main.Size = UDim2.new(0, 360, 0, 260)
 Main.Position = UDim2.new(0.5, -180, 0.5, -130)
 Main.BackgroundColor3 = Color3.fromRGB(0,0,0)
 Main.BorderSizePixel = 0
 Main.Parent = ScreenGui
+
+-- Rounded corners
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0,15)
+UICorner.Parent = Main
 
 -- Main Stroke
 local Stroke = Instance.new("UIStroke")
@@ -72,7 +77,7 @@ Eye.Parent = Main
 
 -- Flashing eye
 task.spawn(function()
-	while true do
+	while Main.Parent do
 		for i=0,1,0.05 do
 			Eye.ImageTransparency = i
 			task.wait(0.03)
@@ -133,6 +138,17 @@ CopyStroke.Color = Color3.fromRGB(255,255,255)
 CopyStroke.Thickness = 1
 CopyStroke.Parent = CopyKey
 
+-- Discord/BRNX labels
+local DiscordLabel = Instance.new("TextLabel")
+DiscordLabel.Size = UDim2.new(1,0,0,20)
+DiscordLabel.Position = UDim2.new(0,0,1,-40)
+DiscordLabel.BackgroundTransparency = 1
+DiscordLabel.Text = "discord.gg/Ud8fAMHZ7a | BRNX 🖤"
+DiscordLabel.TextColor3 = Color3.fromRGB(255,255,255)
+DiscordLabel.Font = Enum.Font.Gotham
+DiscordLabel.TextSize = 14
+DiscordLabel.Parent = Main
+
 -- Close Button
 local CloseBtn = Instance.new("TextButton")
 CloseBtn.Size = UDim2.new(0,30,0,30)
@@ -144,28 +160,39 @@ CloseBtn.Font = Enum.Font.GothamBold
 CloseBtn.TextSize = 18
 CloseBtn.Parent = Main
 
-CloseBtn.MouseButton1Click:Connect(function()
-	Main:Destroy()
-end)
-
--- BUTTON HOVER
-local function AddHover(button)
-	local Glow = Instance.new("UIStroke")
-	Glow.Color = Color3.fromRGB(255,255,255)
-	Glow.Thickness = 1
-	Glow.Parent = button
-
-	button.MouseEnter:Connect(function()
-		TweenService:Create(Glow, TweenInfo.new(0.3), {Thickness = 4}):Play()
-	end)
-	button.MouseLeave:Connect(function()
-		TweenService:Create(Glow, TweenInfo.new(0.3), {Thickness = 1}):Play()
-	end)
+-- DRAGGING
+local dragging = false
+local dragInput, dragStart, startPos
+local function update(input)
+	local delta = input.Position - dragStart
+	Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
+	                          startPos.Y.Scale, startPos.Y.Offset + delta.Y)
 end
 
-AddHover(Submit)
-AddHover(CopyKey)
-AddHover(CloseBtn)
+Main.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		dragStart = input.Position
+		startPos = Main.Position
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end)
+
+Main.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement then
+		dragInput = input
+	end
+end)
+
+RunService.RenderStepped:Connect(function()
+	if dragging and dragInput then
+		update(dragInput)
+	end
+end)
 
 -- NOTIFICATIONS
 local NotifyFolder = Instance.new("Folder")
@@ -225,7 +252,7 @@ local function CreateNotification(title, content, duration)
 	end)
 end
 
--- Button actions with notifications
+-- BUTTONS
 Submit.MouseButton1Click:Connect(function()
 	TweenService:Create(Submit, TweenInfo.new(0.1), {BackgroundTransparency = 0.5}):Play()
 	task.wait(0.1)
@@ -233,6 +260,8 @@ Submit.MouseButton1Click:Connect(function()
 	if KeyBox.Text == "Bronx1284732" then
 		CreateNotification("Access Granted", "Key accepted. Loading script...", 3)
 		task.wait(1)
+		-- Destroy rain when UI closes
+		if RainFolder then RainFolder:Destroy() end
 		Main:Destroy()
 	else
 		CreateNotification("Invalid Key", "The key you entered is incorrect.", 3)
@@ -244,39 +273,29 @@ CopyKey.MouseButton1Click:Connect(function()
 	CreateNotification("Link Copied", "Key link copied to clipboard.", 3)
 end)
 
--- DRAGGING
-local dragging = false
-local dragInput, dragStart, startPos
-local function update(input)
-	local delta = input.Position - dragStart
-	Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
-	                          startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+CloseBtn.MouseButton1Click:Connect(function()
+	if RainFolder then RainFolder:Destroy() end
+	Main:Destroy()
+end)
+
+-- BUTTON HOVER
+local function AddHover(button)
+	local Glow = Instance.new("UIStroke")
+	Glow.Color = Color3.fromRGB(255,255,255)
+	Glow.Thickness = 1
+	Glow.Parent = button
+
+	button.MouseEnter:Connect(function()
+		TweenService:Create(Glow, TweenInfo.new(0.3), {Thickness = 4}):Play()
+	end)
+	button.MouseLeave:Connect(function()
+		TweenService:Create(Glow, TweenInfo.new(0.3), {Thickness = 1}):Play()
+	end)
 end
 
-Main.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		dragging = true
-		dragStart = input.Position
-		startPos = Main.Position
-		input.Changed:Connect(function()
-			if input.UserInputState == Enum.UserInputState.End then
-				dragging = false
-			end
-		end)
-	end
-end)
-
-Main.InputChanged:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseMovement then
-		dragInput = input
-	end
-end)
-
-RunService.RenderStepped:Connect(function()
-	if dragging and dragInput then
-		update(dragInput)
-	end
-end)
+AddHover(Submit)
+AddHover(CopyKey)
+AddHover(CloseBtn)
 
 -- SHIMMERING RAIN
 local RainFolder = Instance.new("Folder")
