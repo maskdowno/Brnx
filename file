@@ -1,0 +1,179 @@
+local Player = game:GetService("Players").LocalPlayer
+local UIS = game:GetService("UserInputService")
+local TS = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local PlayerGui = Player:WaitForChild("PlayerGui")
+
+if PlayerGui:FindFirstChild("BRNX_Studio") then PlayerGui.BRNX_Studio:Destroy() end
+
+local ScreenGui = Instance.new("ScreenGui", PlayerGui)
+ScreenGui.Name = "BRNX_Studio"; ScreenGui.ResetOnSpawn = false
+
+local GlobalStorage = Instance.new("Folder", ScreenGui); GlobalStorage.Name = "Layers"
+
+local currentText = nil
+local activeEffects = {}
+local toggleMemory = {} 
+local topZ = 10
+local Fonts = {Enum.Font.LuckiestGuy, Enum.Font.FredokaOne, Enum.Font.GothamBold, Enum.Font.Arcade, Enum.Font.Bangers, Enum.Font.Creepster}
+
+-- [[ UI ENGINE ]] --
+local B_Btn = Instance.new("TextButton", ScreenGui)
+B_Btn.Size, B_Btn.Position, B_Btn.BackgroundTransparency = UDim2.new(0,70,0,70), UDim2.new(0,15,0,15), 1
+B_Btn.Text, B_Btn.Font, B_Btn.TextSize, B_Btn.TextColor3 = "B", Enum.Font.FredokaOne, 55, Color3.fromRGB(0, 210, 255)
+Instance.new("UIStroke", B_Btn).Color = Color3.fromRGB(0, 150, 255)
+
+local Phone = Instance.new("Frame", ScreenGui)
+Phone.Size, Phone.Position, Phone.BackgroundColor3 = UDim2.new(0,300,0,580), UDim2.new(0.5,-150,0.5,-290), Color3.fromRGB(10,10,12)
+Phone.Visible = false; Instance.new("UICorner", Phone).CornerRadius = UDim.new(0,25)
+
+-- [[ DRAG LOGIC ]] --
+local function makeDraggable(obj)
+    local dragging, dragInput, dragStart, startPos
+    obj.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true; dragStart = input.Position; startPos = obj.Position
+            currentText = obj; topZ = topZ + 1; obj.ZIndex = topZ
+            input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then dragging = false end end)
+        end
+    end)
+    obj.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end
+    end)
+    UIS.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - dragStart
+            obj.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+end
+makeDraggable(Phone)
+
+-- [[ TABS ]] --
+local Container = Instance.new("Frame", Phone)
+Container.Size, Container.Position, Container.BackgroundTransparency = UDim2.new(1,-20,0.7,0), UDim2.new(0,10,0.22,0), 1
+
+local function CreateSec(name, vis)
+    local s = Instance.new("ScrollingFrame", Container); s.Name, s.Size, s.Visible = name, UDim2.new(1,0,1,0), vis
+    s.BackgroundTransparency, s.CanvasSize, s.ScrollBarThickness = 1, UDim2.new(0,0,10,0), 0
+    Instance.new("UIListLayout", s).Padding = UDim.new(0,8)
+    return s
+end
+local MainS, StyleS, FXS, ListS = CreateSec("Main", true), CreateSec("Style", false), CreateSec("FX", false), CreateSec("List", false)
+
+local Nav = Instance.new("Frame", Phone); Nav.Size, Nav.Position, Nav.BackgroundTransparency = UDim2.new(1,0,0,30), UDim2.new(0,0,0.14,0), 1
+Instance.new("UIListLayout", Nav).FillDirection, Instance.new("UIListLayout", Nav).HorizontalAlignment, Instance.new("UIListLayout", Nav).Padding = "Horizontal", "Center", UDim.new(0,5)
+
+local function NavBtn(txt, sec)
+    local b = Instance.new("TextButton", Nav); b.Size, b.Text, b.BackgroundColor3 = UDim2.new(0,65,0,25), txt, Color3.fromRGB(30,30,35)
+    b.TextColor3, b.Font, b.TextSize = Color3.new(1,1,1), Enum.Font.GothamBold, 10; Instance.new("UICorner", b)
+    b.MouseButton1Click:Connect(function() for _,v in pairs(Container:GetChildren()) do v.Visible = false end sec.Visible = true end)
+end
+NavBtn("MAIN", MainS); NavBtn("STYLE", StyleS); NavBtn("FX", FXS); NavBtn("LAYERS", ListS)
+
+-- [[ DYNAMIC UI ELEMENTS ]] --
+local DeleteBtn = Instance.new("TextButton", MainS); DeleteBtn.Size, DeleteBtn.Text, DeleteBtn.BackgroundColor3 = UDim2.new(1,0,0,38), "DELETE LAYER", Color3.fromRGB(200,50,50)
+DeleteBtn.TextColor3, DeleteBtn.Font, DeleteBtn.Visible = Color3.new(1,1,1), Enum.Font.GothamBold, false; Instance.new("UICorner", DeleteBtn)
+
+local SizeBox = Instance.new("TextBox", StyleS); SizeBox.Size, SizeBox.BackgroundColor3, SizeBox.TextColor3 = UDim2.new(1,0,0,35), Color3.fromRGB(25,25,30), Color3.new(1,1,1)
+SizeBox.PlaceholderText = "Size"; SizeBox.Visible = false; Instance.new("UICorner", SizeBox)
+
+-- [[ TOGGLE ENGINE ]] --
+local function AddFX(name, parent, func)
+    local b = Instance.new("TextButton", parent); b.Size, b.Font, b.TextSize = UDim2.new(1,0,0,35), Enum.Font.GothamMedium, 13; Instance.new("UICorner", b)
+    RunService.RenderStepped:Connect(function()
+        local isOn = (currentText and activeEffects[currentText] and activeEffects[currentText][name])
+        b.BackgroundColor3 = isOn and Color3.fromRGB(0, 255, 150) or Color3.fromRGB(40,40,45)
+        b.Text = name .. (isOn and " [ON]" or " [OFF]")
+    end)
+    b.MouseButton1Click:Connect(function()
+        if not currentText then return end
+        activeEffects[currentText] = activeEffects[currentText] or {}
+        activeEffects[currentText][name] = not activeEffects[currentText][name]
+        func(activeEffects[currentText][name], currentText)
+    end)
+end
+
+-- [[ THE 15+ EFFECTS ]] --
+AddFX("Glitch", FXS, function(on, o)
+    task.spawn(function() while o and activeEffects[o].Glitch do 
+        o.Position = o.Position + UDim2.new(0, math.random(-5,5), 0, math.random(-5,5))
+        o.TextTransparency = math.random(0,3)/10; task.wait(0.05) 
+    end o.TextTransparency = 0 end)
+end)
+
+AddFX("Wave", FXS, function(on, o)
+    local startY = o.Position.Y.Offset
+    task.spawn(function() while o and activeEffects[o].Wave do 
+        o.Position = UDim2.new(o.Position.X.Scale, o.Position.X.Offset, o.Position.Y.Scale, startY + math.sin(tick()*5)*20)
+        task.wait() 
+    end end)
+end)
+
+AddFX("Ghosting", FXS, function(on, o)
+    task.spawn(function() while o and activeEffects[o].Ghosting do 
+        local clone = o:Clone(); clone.Parent = o.Parent; clone.ZIndex = o.ZIndex - 1
+        TS:Create(clone, TweenInfo.new(0.5), {TextTransparency = 1, Size = o.Size + UDim2.new(0,50,0,50)}):Play()
+        task.wait(0.2); game:GetService("Debris"):AddItem(clone, 0.5)
+    end end)
+end)
+
+AddFX("Rotation", FXS, function(on, o)
+    task.spawn(function() while o and activeEffects[o].Rotation do o.Rotation = o.Rotation + 5; task.wait() end o.Rotation = 0 end)
+end)
+
+AddFX("Breathing", FXS, function(on, o)
+    task.spawn(function() while o and activeEffects[o].Breathing do 
+        TS:Create(o, TweenInfo.new(1), {TextSize = o.TextSize + 15}):Play(); task.wait(1)
+        TS:Create(o, TweenInfo.new(1), {TextSize = o.TextSize - 15}):Play(); task.wait(1)
+    end end)
+end)
+
+AddFX("Rainbow", FXS, function(on, o)
+    task.spawn(function() while o and activeEffects[o].Rainbow do o.TextColor3 = Color3.fromHSV(tick()%5/5, 0.8, 1) task.wait() end end)
+end)
+
+AddFX("Strobe", FXS, function(on, o)
+    task.spawn(function() while o and activeEffects[o].Strobe do o.Visible = not o.Visible; task.wait(0.1) end o.Visible = true end)
+end)
+
+AddFX("Shake", FXS, function(on, o)
+    task.spawn(function() while o and activeEffects[o].Shake do 
+        o.Rotation = math.random(-10,10); task.wait(0.05) 
+    end o.Rotation = 0 end)
+end)
+
+AddFX("Beat Jump", FXS, function(on, o)
+    local startY = o.Position.Y.Offset
+    task.spawn(function() while o and activeEffects[o].Jump do
+        TS:Create(o, TweenInfo.new(0.2), {Position = UDim2.new(o.Position.X.Scale, o.Position.X.Offset, o.Position.Y.Scale, startY-40)}):Play()
+        task.wait(0.2); TS:Create(o, TweenInfo.new(0.2), {Position = UDim2.new(o.Position.X.Scale, o.Position.X.Offset, o.Position.Y.Scale, startY)}):Play()
+        task.wait(0.6)
+    end end)
+end)
+
+-- [[ MAIN ACTIONS ]] --
+local CreateBtn = Instance.new("TextButton", MainS)
+CreateBtn.Size, CreateBtn.Text, CreateBtn.BackgroundColor3 = UDim2.new(1,0,0,38), "+ NEW LAYER", Color3.fromRGB(0,130,255)
+CreateBtn.TextColor3, CreateBtn.Font = Color3.new(1,1,1), Enum.Font.GothamBold; Instance.new("UICorner", CreateBtn)
+CreateBtn.MouseButton1Click:Connect(function()
+    local t = Instance.new("TextBox", GlobalStorage)
+    t.Size, t.Position, t.BackgroundTransparency = UDim2.new(0,250,0,60), UDim2.new(0.5,-125,0.4,0), 1
+    t.Text, t.TextColor3, t.TextSize, t.Font = "BRNX OMEGA", Color3.new(1,1,1), 45, Enum.Font.LuckiestGuy
+    makeDraggable(t)
+end)
+
+DeleteBtn.MouseButton1Click:Connect(function() if currentText then currentText:Destroy(); currentText = nil end end)
+SizeBox.FocusLost:Connect(function() if currentText then currentText.TextSize = tonumber(SizeBox.Text) or 45 end end)
+
+-- [[ PERSISTENCE LOOP ]] --
+task.spawn(function()
+    while task.wait(0.1) do
+        local isSel = (currentText ~= nil)
+        DeleteBtn.Visible = isSel
+        SizeBox.Visible = isSel
+        if isSel and not SizeBox.IsFocused then SizeBox.Text = tostring(currentText.TextSize) end
+    end
+end)
+
+B_Btn.MouseButton1Click:Connect(function() Phone.Visible = not Phone.Visible end)
