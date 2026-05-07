@@ -1,0 +1,158 @@
+local Player = game:GetService("Players").LocalPlayer
+local UIS = game:GetService("UserInputService")
+local TS = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local PlayerGui = Player:WaitForChild("PlayerGui")
+
+if PlayerGui:FindFirstChild("BRNX_Studio") then PlayerGui.BRNX_Studio:Destroy() end
+
+local ScreenGui = Instance.new("ScreenGui", PlayerGui); ScreenGui.Name = "BRNX_Studio"; ScreenGui.ResetOnSpawn = false
+local GlobalStorage = Instance.new("Folder", ScreenGui); GlobalStorage.Name = "Layers"
+
+local currentText, activeEffects, topZ = nil, {}, 100
+
+-- [[ UI TOGGLE B ]] --
+local B_Btn = Instance.new("TextButton", ScreenGui)
+B_Btn.Size, B_Btn.Position, B_Btn.BackgroundTransparency = UDim2.new(0,70,0,70), UDim2.new(0,15,0,15), 1
+B_Btn.Text, B_Btn.Font, B_Btn.TextSize, B_Btn.TextColor3 = "B", Enum.Font.FredokaOne, 55, Color3.fromRGB(0, 210, 255)
+Instance.new("UIStroke", B_Btn).Color = Color3.fromRGB(0, 150, 255)
+
+-- [[ DRAG LOGIC ]] --
+local function makeDraggable(obj, isText)
+    local dragging, dragStart, startPos
+    obj.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true; dragStart = input.Position; startPos = obj.Position
+            if isText then currentText = obj; topZ = topZ + 1; obj.ZIndex = topZ end
+        end
+    end)
+    UIS.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local delta = input.Position - dragStart
+            obj.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+    obj.InputEnded:Connect(function() dragging = false end)
+end
+
+-- [[ STUDIO FRAME ]] --
+local Phone = Instance.new("Frame", ScreenGui)
+Phone.Size, Phone.Position, Phone.BackgroundColor3 = UDim2.new(0,330,0,620), UDim2.new(0.5,-165,0.5,-310), Color3.fromRGB(5,5,7)
+Phone.Visible = false; Instance.new("UICorner", Phone).CornerRadius = UDim.new(0,25)
+makeDraggable(Phone, false)
+
+local Container = Instance.new("Frame", Phone)
+Container.Size, Container.Position, Container.BackgroundTransparency = UDim2.new(1,-20,0.72,0), UDim2.new(0,10,0.2,0), 1
+
+local function CreateSec(name, vis)
+    local s = Instance.new("ScrollingFrame", Container); s.Name, s.Size, s.Visible = name, UDim2.new(1,0,1,0), vis
+    s.BackgroundTransparency, s.CanvasSize, s.ScrollBarThickness = 1, UDim2.new(0,0,12,0), 0
+    Instance.new("UIListLayout", s).Padding = UDim.new(0,6)
+    return s
+end
+local MainS, StyleS, FXS, ListS = CreateSec("Main", true), CreateSec("Style", false), CreateSec("FX", false), CreateSec("List", false)
+
+-- [[ NAV SYSTEM ]] --
+local Nav = Instance.new("Frame", Phone); Nav.Size, Nav.Position, Nav.BackgroundTransparency = UDim2.new(1,0,0,30), UDim2.new(0,0,0.12,0), 1
+Instance.new("UIListLayout", Nav).FillDirection, Instance.new("UIListLayout", Nav).HorizontalAlignment, Instance.new("UIListLayout", Nav).Padding = "Horizontal", "Center", UDim.new(0,4)
+
+local function NavBtn(txt, sec)
+    local b = Instance.new("TextButton", Nav); b.Size, b.Text, b.BackgroundColor3 = UDim2.new(0,75,0,25), txt, Color3.fromRGB(20,20,25)
+    b.TextColor3, b.Font, b.TextSize = Color3.new(1,1,1), Enum.Font.GothamBold, 9; Instance.new("UICorner", b)
+    b.MouseButton1Click:Connect(function() for _,v in pairs(Container:GetChildren()) do v.Visible = false end sec.Visible = true end)
+end
+NavBtn("MAIN", MainS); NavBtn("STYLE", StyleS); NavBtn("FX", FXS); NavBtn("LAYERS", ListS)
+
+-- [[ MASTER CONTROLLER ]] --
+local Manager = Instance.new("Frame", MainS); Manager.Size, Manager.BackgroundTransparency, Manager.Visible = UDim2.new(1,0,0,210), 1, false
+Instance.new("UIListLayout", Manager).Padding = UDim.new(0,5)
+
+local function EditBox(parent, placeholder, func)
+    local eb = Instance.new("TextBox", parent); eb.Size, eb.BackgroundColor3, eb.TextColor3 = UDim2.new(1,0,0,35), Color3.fromRGB(20,20,25), Color3.new(1,1,1)
+    eb.PlaceholderText, eb.Font, eb.TextSize = placeholder, Enum.Font.GothamMedium, 13; Instance.new("UICorner", eb)
+    eb.FocusLost:Connect(function() if currentText then func(eb.Text) end end); return eb
+end
+
+local TextIn = EditBox(Manager, "Edit Text Content", function(t) currentText.Text = t end)
+local SizeIn = EditBox(Manager, "Text Size (e.g. 50)", function(t) currentText.TextSize = tonumber(t) or 45 end)
+local ColorIn = EditBox(Manager, "Color (Red / #00FF00)", function(t) pcall(function() if t:sub(1,1) == "#" then currentText.TextColor3 = Color3.fromHex(t) else currentText.TextColor3 = Color3.fromName(t) end end) end)
+local DelBtn = Instance.new("TextButton", Manager); DelBtn.Size, DelBtn.Text, DelBtn.BackgroundColor3 = UDim2.new(1,0,0,35), "DELETE SELECTED", Color3.fromRGB(180,40,40)
+DelBtn.TextColor3, DelBtn.Font = Color3.new(1,1,1), Enum.Font.GothamBold; Instance.new("UICorner", DelBtn)
+DelBtn.MouseButton1Click:Connect(function() if currentText then currentText:Destroy(); currentText = nil end end)
+
+local CreateBtn = Instance.new("TextButton", MainS); CreateBtn.Size, CreateBtn.Text, CreateBtn.BackgroundColor3 = UDim2.new(1,0,0,45), "+ CREATE NEW LAYER", Color3.fromRGB(0,100,255)
+CreateBtn.TextColor3, CreateBtn.Font = Color3.new(1,1,1), Enum.Font.GothamBold; Instance.new("UICorner", CreateBtn)
+CreateBtn.MouseButton1Click:Connect(function()
+    local t = Instance.new("TextBox", GlobalStorage); t.Size, t.Position, t.BackgroundTransparency = UDim2.new(0,250,0,60), UDim2.new(0.5,-125,0.4,0), 1
+    t.Text, t.TextColor3, t.TextSize, t.Font = "NEW LAYER", Color3.new(1,1,1), 45, Enum.Font.LuckiestGuy; makeDraggable(t, true)
+end)
+
+-- [[ 20+ STYLES & FONTS ]] --
+local StyleList = {
+    "LuckiestGuy", "FredokaOne", "GothamBold", "Arcade", "Bangers", "Creepster", "SciFi", "Fantasy", 
+    "Antique", "Code", "Highway", "Jura", "Oswald", "PatrickHand", "PermanentMarker", "Roboto", 
+    "SpecialElite", "Ubuntu", "Merriweather", "TitilliumWeb"
+}
+for _, s in pairs(StyleList) do
+    local b = Instance.new("TextButton", StyleS); b.Size, b.Text, b.BackgroundColor3 = UDim2.new(1,0,0,30), s, Color3.fromRGB(30,30,35)
+    b.TextColor3, b.Font = Color3.new(1,1,1), Enum.Font[s]; Instance.new("UICorner", b)
+    b.MouseButton1Click:Connect(function() if currentText then currentText.Font = Enum.Font[s] end end)
+end
+
+-- [[ 20+ FX EFFECTS ]] --
+local function AddFX(name, func)
+    local b = Instance.new("TextButton", FXS); b.Size, b.BackgroundColor3 = UDim2.new(1,0,0,32), Color3.fromRGB(25,25,30)
+    b.TextColor3, b.Font, b.TextSize = Color3.new(1,1,1), Enum.Font.Gotham, 12; Instance.new("UICorner", b)
+    RunService.RenderStepped:Connect(function()
+        local on = (currentText and activeEffects[currentText] and activeEffects[currentText][name])
+        b.BackgroundColor3 = on and Color3.fromRGB(0, 180, 255) or Color3.fromRGB(35,35,40)
+        b.Text = name .. (on and " [ON]" or " [OFF]")
+    end)
+    b.MouseButton1Click:Connect(function() if currentText then activeEffects[currentText] = activeEffects[currentText] or {}; activeEffects[currentText][name] = not activeEffects[currentText][name]; func(activeEffects[currentText][name], currentText) end end)
+end
+
+AddFX("Rainbow", function(on, o) task.spawn(function() while o and activeEffects[o].Rainbow do o.TextColor3 = Color3.fromHSV(tick()%5/5, 0.8, 1) task.wait() end end) end)
+AddFX("Beat Jump", function(on, o) local sY = o.Position.Y.Offset; task.spawn(function() while o and activeEffects[o]["Beat Jump"] do TS:Create(o, TweenInfo.new(0.2), {Position = UDim2.new(o.Position.X.Scale, o.Position.X.Offset, o.Position.Y.Scale, sY-40)}):Play(); task.wait(0.2); TS:Create(o, TweenInfo.new(0.2), {Position = UDim2.new(o.Position.X.Scale, o.Position.X.Offset, o.Position.Y.Scale, sY)}):Play(); task.wait(0.6) end end) end)
+AddFX("Glitch", function(on, o) task.spawn(function() while o and activeEffects[o].Glitch do o.Position = o.Position + UDim2.new(0,math.random(-5,5),0,math.random(-5,5)); task.wait(0.05) end end) end)
+AddFX("Strobe", function(on, o) task.spawn(function() while o and activeEffects[o].Strobe do o.Visible = not o.Visible; task.wait(0.1) end o.Visible = true end) end)
+AddFX("Liquid Gradient", function(on, o) local g = o:FindFirstChild("UIGradient") or Instance.new("UIGradient", o); g.Enabled = on; g.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.new(1,0,0)), ColorSequenceKeypoint.new(0.5, Color3.new(0,1,1)), ColorSequenceKeypoint.new(1, Color3.new(1,0,1))}); task.spawn(function() while g.Enabled do g.Rotation = g.Rotation + 2; task.wait() end end) end)
+AddFX("Wave", function(on, o) local sY = o.Position.Y.Offset; task.spawn(function() while o and activeEffects[o].Wave do o.Position = UDim2.new(o.Position.X.Scale, o.Position.X.Offset, o.Position.Y.Scale, sY + math.sin(tick()*5)*20); task.wait() end end) end)
+AddFX("Breathing", function(on, o) task.spawn(function() while o and activeEffects[o].Breathing do TS:Create(o, TweenInfo.new(1), {TextSize = o.TextSize + 10}):Play(); task.wait(1); TS:Create(o, TweenInfo.new(1), {TextSize = o.TextSize - 10}):Play(); task.wait(1) end end) end)
+AddFX("Rotation", function(on, o) task.spawn(function() while o and activeEffects[o].Rotation do o.Rotation = o.Rotation + 5; task.wait() end o.Rotation = 0 end) end)
+AddFX("Shake", function(on, o) task.spawn(function() while o and activeEffects[o].Shake do o.Rotation = math.random(-10,10); task.wait(0.05) end o.Rotation = 0 end) end)
+AddFX("Typewriter", function(on, o) task.spawn(function() while o and activeEffects[o].Typewriter do local f = o.Text; o.Text = ""; for i=1, #f do if not activeEffects[o].Typewriter then break end o.Text = f:sub(1,i) task.wait(0.08) end task.wait(1.5) end end) end)
+AddFX("Neon Glow", function(on, o) local s = o:FindFirstChild("UIStroke") or Instance.new("UIStroke", o); s.Enabled = on; s.Thickness = 3; s.Color = o.TextColor3; end)
+AddFX("Echo", function(on, o) task.spawn(function() while o and activeEffects[o].Echo do local c = o:Clone(); c.Parent = o.Parent; c.ZIndex = o.ZIndex-1; TS:Create(c, TweenInfo.new(0.5), {TextTransparency = 1, Size = o.Size + UDim2.new(0,50,0,50)}):Play(); game:GetService("Debris"):AddItem(c, 0.5); task.wait(0.2) end end) end)
+AddFX("Invert Color", function(on, o) task.spawn(function() while o and activeEffects[o]["Invert Color"] do o.TextColor3 = Color3.new(1-o.TextColor3.R, 1-o.TextColor3.G, 1-o.TextColor3.B); task.wait(0.5) end end) end)
+AddFX("Ghosting", function(on, o) task.spawn(function() while o and activeEffects[o].Ghosting do o.TextTransparency = 0.5; task.wait(0.1); o.TextTransparency = 0; task.wait(0.1) end end) end)
+AddFX("Shadow", function(on, o) local s = o:FindFirstChild("DropShadow") or Instance.new("TextLabel", o); s.Name = "DropShadow"; s.Size, s.Position, s.BackgroundTransparency, s.ZIndex = UDim2.new(1,0,1,0), UDim2.new(0,4,0,4), 1, o.ZIndex-1; s.Text, s.Font, s.TextSize, s.TextColor3 = o.Text, o.Font, o.TextSize, Color3.new(0,0,0); s.Visible = on end)
+AddFX("Tilt", function(on, o) task.spawn(function() while o and activeEffects[o].Tilt do TS:Create(o, TweenInfo.new(0.5), {Rotation = 15}):Play(); task.wait(0.5); TS:Create(o, TweenInfo.new(0.5), {Rotation = -15}):Play(); task.wait(0.5) end o.Rotation = 0 end) end)
+AddFX("Flicker", function(on, o) task.spawn(function() while o and activeEffects[o].Flicker do o.TextTransparency = math.random(1,10)/10; task.wait(0.05) end o.TextTransparency = 0 end) end)
+AddFX("Fly In", function(on, o) o.Position = UDim2.new(0,-300,0.5,0); TS:Create(o, TweenInfo.new(1, Enum.EasingStyle.Bounce), {Position = UDim2.new(0.5,-125,0.4,0)}):Play() end)
+AddFX("Spin In", function(on, o) o.Rotation = -360; TS:Create(o, TweenInfo.new(1), {Rotation = 0}):Play() end)
+AddFX("Blur Move", function(on, o) task.spawn(function() while o and activeEffects[o]["Blur Move"] do TS:Create(o, TweenInfo.new(0.1), {Rotation = 2}):Play(); task.wait(0.1); TS:Create(o, TweenInfo.new(0.1), {Rotation = -2}):Play(); task.wait(0.1) end end) end)
+
+-- [[ LAYER LIST UPDATER ]] --
+task.spawn(function()
+    while task.wait(0.5) do
+        for _, v in pairs(ListS:GetChildren()) do if v:IsA("TextButton") then v:Destroy() end end
+        for _, layer in pairs(GlobalStorage:GetChildren()) do
+            local lb = Instance.new("TextButton", ListS); lb.Size, lb.Text, lb.BackgroundColor3 = UDim2.new(1,0,0,32), layer.Text, Color3.fromRGB(30,30,35)
+            lb.TextColor3, lb.Font = Color3.new(1,1,1), Enum.Font.GothamBold; lb.TextSize = 10; Instance.new("UICorner", lb)
+            lb.MouseButton1Click:Connect(function() currentText = layer; topZ = topZ + 1; layer.ZIndex = topZ end)
+        end
+    end
+end)
+
+-- [[ MASTER LOOP ]] --
+task.spawn(function()
+    while task.wait(0.1) do
+        Manager.Visible = (currentText ~= nil)
+        if currentText then
+            if not TextIn.IsFocused then TextIn.Text = currentText.Text end
+            if not SizeIn.IsFocused then SizeIn.Text = tostring(currentText.TextSize) end
+        end
+    end
+end)
+
+B_Btn.MouseButton1Click:Connect(function() Phone.Visible = not Phone.Visible end)
